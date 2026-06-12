@@ -6,7 +6,8 @@
 #import <mach/mach.h>
 #import <substrate.h>
 
-// ptrace constants
+// ptrace declaration and constants
+extern int ptrace(int request, pid_t pid, caddr_t addr, int data);
 #ifndef PT_DENY_ATTACH
 #define PT_DENY_ATTACH 0
 #endif
