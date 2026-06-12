@@ -4,6 +4,12 @@
 #import <dlfcn.h>
 #import <sys/sysctl.h>
 #import <mach/mach.h>
+#import <substrate.h>
+
+// ptrace constants
+#ifndef PT_DENY_ATTACH
+#define PT_DENY_ATTACH 0
+#endif
 
 // NSBundle Hook - Bypass Bundle ID Check
 static NSString* (*orig_bundleIdentifier)(NSBundle* self, SEL _cmd);
@@ -23,7 +29,7 @@ static OSStatus hooked_SecTrustEvaluate(SecTrustRef trust, SecTrustResultType *r
     return errSecSuccess;
 }
 
-// SecTrustEvaluateWithError Hook
+// SecTrustEvaluateWithError Hook (iOS 12.0+)
 static BOOL (*orig_SecTrustEvaluateWithError)(SecTrustRef trust, CFErrorRef *error);
 static BOOL hooked_SecTrustEvaluateWithError(SecTrustRef trust, CFErrorRef *error) {
     NSLog(@"[WechatBypass] SecTrustEvaluateWithError bypassed");
@@ -104,8 +110,8 @@ static __attribute__((constructor)) void WechatBypassInit() {
     MSHookFunction((void *)SecTrustEvaluate,
                    (void *)hooked_SecTrustEvaluate, (void **)&orig_SecTrustEvaluate);
 
-    // SecTrustEvaluateWithError (iOS 13+)
-    if (SecTrustEvaluateWithError != NULL) {
+    // SecTrustEvaluateWithError (iOS 12.0+)
+    if (@available(iOS 12.0, *)) {
         MSHookFunction((void *)SecTrustEvaluateWithError,
                        (void *)hooked_SecTrustEvaluateWithError, (void **)&orig_SecTrustEvaluateWithError);
     }
