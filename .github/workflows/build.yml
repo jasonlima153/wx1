@@ -2,9 +2,7 @@ name: Build WechatBypass
 
 on:
   push:
-    branches: [wechat-bypass]
-    paths:
-      - 'wechat_bypass/**'
+    branches: [wechat-bypass, main]
   workflow_dispatch:
 
 jobs:
@@ -28,15 +26,35 @@ jobs:
           key: ${{ runner.os }}-${{ env.upstream_heads }}
 
       - name: Prepare Theos
-        uses: Randomblock1/theos-action@v1
-        with:
-          theos-dir: 'theos'
-          theos-sdks: 'https://github.com/theos/sdks'
+        run: |
+          if [ ! -d "theos" ]; then
+            git clone --recursive https://github.com/theos/theos.git theos
+          fi
+          export THEOS=${{ github.workspace }}/theos
+          echo "THEOS=$THEOS" >> $GITHUB_ENV
+
+      - name: Prepare iOS SDK
+        run: |
+          export THEOS=${{ github.workspace }}/theos
+          if [ ! -d "$THEOS/sdks" ]; then
+            mkdir -p $THEOS/sdks
+            git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git $THEOS/sdks-temp
+            cd $THEOS/sdks-temp
+            git sparse-checkout set iPhoneOS14.5.sdk
+            mv iPhoneOS14.5.sdk $THEOS/sdks/
+            cd ..
+            rm -rf $THEOS/sdks-temp
+          fi
+
+      - name: Install dependencies
+        run: |
+          brew install make xz ldid dpkg
 
       - name: Build rootful package
         run: |
+          export THEOS=${{ github.workspace }}/theos
           rm -f packages/*
-          make package FINALPACKAGE=1
+          gmake clean package FINALPACKAGE=1
 
       - name: Upload rootful package
         uses: actions/upload-artifact@v4
@@ -46,8 +64,9 @@ jobs:
 
       - name: Build rootless package
         run: |
+          export THEOS=${{ github.workspace }}/theos
           rm -f packages/*
-          make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+          gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload rootless package
         uses: actions/upload-artifact@v4
