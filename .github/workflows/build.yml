@@ -12,39 +12,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: wechat-bypass
-
-      - name: Check cache
-        run: |
-          echo "upstream_heads=$(git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1)-$(git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1)" >> $GITHUB_ENV
-
-      - name: Use cache
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/theos
-          key: ${{ runner.os }}-${{ env.upstream_heads }}
+          ref: main
 
       - name: Prepare Theos
         run: |
-          if [ ! -d "theos" ]; then
-            git clone --recursive https://github.com/theos/theos.git theos
-          fi
+          rm -rf theos
+          git clone --recursive https://github.com/theos/theos.git theos
           export THEOS=${{ github.workspace }}/theos
           echo "THEOS=$THEOS" >> $GITHUB_ENV
 
       - name: Prepare iOS SDK
         run: |
           export THEOS=${{ github.workspace }}/theos
-          if [ ! -d "$THEOS/sdks" ]; then
-            mkdir -p $THEOS/sdks
-            git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git $THEOS/sdks-temp
-            cd $THEOS/sdks-temp
-            git sparse-checkout set iPhoneOS14.5.sdk
-            mv iPhoneOS14.5.sdk $THEOS/sdks/
-            cd ..
-            rm -rf $THEOS/sdks-temp
-          fi
+          rm -rf $THEOS/sdks
+          mkdir -p $THEOS/sdks
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git $THEOS/sdks-temp
+          cd $THEOS/sdks-temp
+          git sparse-checkout set iPhoneOS14.5.sdk
+          mv iPhoneOS14.5.sdk $THEOS/sdks/
+          cd ..
+          rm -rf $THEOS/sdks-temp
 
       - name: Install dependencies
         run: |
@@ -53,7 +40,7 @@ jobs:
       - name: Build rootful package
         run: |
           export THEOS=${{ github.workspace }}/theos
-          rm -f packages/*
+          rm -rf .theos packages
           gmake clean package FINALPACKAGE=1
 
       - name: Upload rootful package
@@ -65,7 +52,7 @@ jobs:
       - name: Build rootless package
         run: |
           export THEOS=${{ github.workspace }}/theos
-          rm -f packages/*
+          rm -rf .theos packages
           gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload rootless package
