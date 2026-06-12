@@ -7,7 +7,13 @@
 #import <substrate.h>
 
 // ptrace declaration and constants
-extern int ptrace(int request, pid_t pid, caddr_t addr, int data);
+#ifdef __cplusplus
+extern "C" {
+#endif
+int ptrace(int request, pid_t pid, caddr_t addr, int data);
+#ifdef __cplusplus
+}
+#endif
 #ifndef PT_DENY_ATTACH
 #define PT_DENY_ATTACH 0
 #endif
