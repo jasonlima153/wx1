@@ -1,0 +1,9 @@
+Package: com.security.wechatbypass
+Name: WechatBypass
+Depends: mobilesubstrate, firmware (>= 10.0)
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: Educational security research tweak for analyzing WeChat iOS app
+Maintainer: Security Research
+Author: Security Research
+Section: Tweaks
