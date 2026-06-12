@@ -1,17 +1,12 @@
-THEOS_DEVICE_IP = 127.0.0.1
-THEOS_DEVICE_PORT = 2222
-TARGET := iphone:clang:latest:12.0
-ARCHS = arm64
+export THEOS=/opt/theos
+TARGET = iphone:clang:latest:14.0
+ARCHS = arm64 arm64e
+
 include $(THEOS)/makefiles/common.mk
 
-TWEAK_NAME = WechatBypass
-
-WechatBypass_FILES = Tweak.xm
-WechatBypass_CFLAGS = -fobjc-arc
-WechatBypass_FRAMEWORKS = UIKit Foundation Security
-WechatBypass_LDFLAGS = -lsubstrate
+TWEAK_NAME = WechatBlind
+WechatBlind_FILES = Tweak.xm
+WechatBlind_CFLAGS = -fobjc-arc
+WechatBlind_FRAMEWORKS = UIKit CoreFoundation Security SystemConfiguration
 
 include $(THEOS_MAKE_PATH)/tweak.mk
-
-after-install::
-	install.exec "killall -9 WeChat"
