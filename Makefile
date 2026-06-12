@@ -9,7 +9,6 @@ TWEAK_NAME = WechatBypass
 WechatBypass_FILES = Tweak.xm
 WechatBypass_CFLAGS = -fobjc-arc
 WechatBypass_FRAMEWORKS = UIKit Foundation Security
-WechatBypass_PRIVATE_FRAMEWORKS = AppSupport
 WechatBypass_LDFLAGS = -lsubstrate
 
 include $(THEOS_MAKE_PATH)/tweak.mk
